@@ -1,8 +1,133 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Drum Machine</title>
-  </head>
-  <body></body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drum Machine</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #12121f;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+
+    #drum-machine {
+      padding: 28px;
+      border-radius: 16px;
+      background: #1c1c3a;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    #display {
+      margin: 0 0 18px;
+      min-height: 1.6em;
+      text-align: center;
+      color: #4dd0e1;
+      font-size: 1.25rem;
+      letter-spacing: 0.05em;
+    }
+
+    #pad-bank {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(90px, 1fr));
+      gap: 12px;
+    }
+
+    .drum-pad {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 72px;
+      border-radius: 10px;
+      background: #33265c;
+      color: #f4f4f9;
+      font-size: 1.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.08s ease, background 0.08s ease;
+    }
+
+    .drum-pad:hover {
+      background: #413372;
+    }
+
+    .drum-pad.playing {
+      background: #4dd0e1;
+      color: #12121f;
+      transform: scale(0.95);
+    }
+
+    /* keep the audio element from blocking pad clicks */
+    .drum-pad audio {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="drum-machine">
+    <p id="display"></p>
+    <div id="pad-bank">
+      <div class="drum-pad" id="heater-1" data-clip="Heater 1">Q<audio id="Q" class="clip" src="https://cdn.freecodecamp.org/curriculum/drum/Heater-1.mp3"></audio></div>
+      <div class="drum-pad" id="heater-2" data-clip="Heater 2">W<audio id="W" class="clip" src="https://cdn.freecodecamp.org/curriculum/drum/Heater-2.mp3"></audio></div>
+      <div class="drum-pad" id="heater-3" data-clip="Heater 3">E<audio id="E" class="clip" src="https://cdn.freecodecamp.org/curriculum/drum/Heater-3.mp3"></audio></div>
+      <div class="drum-pad" id="heater-4" data-clip="Heater 4">A<audio id="A" class="clip" src="https://cdn.freecodecamp.org/curriculum/drum/Heater-4_1.mp3"></audio></div>
+      <div class="drum-pad" id="clap" data-clip="Clap">S<audio id="S" class="clip" src="https://cdn.freecodecamp.org/curriculum/drum/Heater-6.mp3"></audio></div>
+      <div class="drum-pad" id="open-hh" data-clip="Open-HH">D<audio id="D" class="clip" src="https://cdn.freecodecamp.org/curriculum/drum/Dsc_Oh.mp3"></audio></div>
+      <div class="drum-pad" id="kick-n-hat" data-clip="Kick-n'-Hat">Z<audio id="Z" class="clip" src="https://cdn.freecodecamp.org/curriculum/drum/Kick_n_Hat.mp3"></audio></div>
+      <div class="drum-pad" id="kick" data-clip="Kick">X<audio id="X" class="clip" src="https://cdn.freecodecamp.org/curriculum/drum/RP4_KICK_1.mp3"></audio></div>
+      <div class="drum-pad" id="closed-hh" data-clip="Closed-HH">C<audio id="C" class="clip" src="https://cdn.freecodecamp.org/curriculum/drum/Cev_H2.mp3"></audio></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var display = document.getElementById("display");
+      var pads = Array.prototype.slice.call(document.querySelectorAll(".drum-pad"));
+
+      function trigger(pad) {
+        var audio = pad.querySelector("audio.clip");
+        if (audio) {
+          try {
+            audio.currentTime = 0;
+            var promise = audio.play();
+            if (promise && typeof promise.catch === "function") {
+              promise.catch(function () {});
+            }
+          } catch (e) { /* older browsers without play() */ }
+        }
+        display.innerText = pad.getAttribute("data-clip");
+        pad.classList.add("playing");
+        setTimeout(function () {
+          pad.classList.remove("playing");
+        }, 150);
+      }
+
+      pads.forEach(function (pad) {
+        var key = pad.textContent.trim(); // Q, W, E, A, S, D, Z, X, C
+
+        pad.addEventListener("click", function () {
+          trigger(pad);
+        });
+
+        document.addEventListener("keydown", function (event) {
+          if (!event || event.key === undefined) return;
+          if (event.key.toUpperCase() === key || event.code === "Key" + key) {
+            trigger(pad);
+          }
+        });
+      });
+    })();
+  </script>
+</body>
 </html>
